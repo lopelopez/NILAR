@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test | NILAR</title>
+    <style>
+        body{background:#0a0a0a;color:#c5a059;padding:20px;font-family:monospace}
+        .ok{color:#22c55e;background:rgba(34,197,94,0.2);padding:10px;border-radius:5px;margin:10px 0}
+        .error{color:#c2410c;background:rgba(194,65,12,0.2);padding:10px;border-radius:5px;margin:10px 0}
+    </style>
+</head>
+<body>
+    <h1>🔍 Test de Acceso</h1>
+    <div id="out"></div>
+    <script type="module">
+        import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import{getAuth,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        const config={apiKey:"AIzaSyB-uiv9yD-NB3Ex288Qb37Du5VgKKuDyfo",authDomain:"nilaratelier.firebaseapp.com",projectId:"nilaratelier",storageBucket:"nilaratelier.firebasestorage.app",messagingSenderId:"914021817740",appId:"1:914021817740:web:fc5c1ff57c1caa3f42caa9"};
+        
+        const app=initializeApp(config);
+        const auth=getAuth(app);
+        const db=getFirestore(app);
+        
+        const out=x=>document.getElementById('out').innerHTML+=x+'<br>';
+        
+        onAuthStateChanged(auth,async user=>{
+            if(!user){out('❌ No hay sesión');return;}
+            out('✅ Usuario: '+user.email);
+            out('📛 UID: '+user.uid);
+            
+            try{
+                const d=await getDoc(doc(db,'usuarios',user.uid));
+                if(d.exists()){
+                    const data=d.data();
+                    out('✅ Existe en Firestore');
+                    out('   rol: '+data.rol);
+                    out('   activo: '+data.activo);
+                    if(data.activo===false){
+                        out('❌ acceso denegado (activo=false)');
+                    }else{
+                        out('✅ 🎉 TIENES ACCESO');
+                        setTimeout(()=>location.href='dashboard.html',2000);
+                    }
+                }else{
+                    out('❌ NO existe en Firestore');
+                }
+            }catch(e){
+                out('❌ Error: '+e.message);
+            }
+        });
+    </script>
+</body>
+</html>

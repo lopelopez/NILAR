@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ventas | Atelier NILAR</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Manrope',sans-serif;}
+        :root{--black:#0a0a0a;--black-soft:#141414;--gold:#c5a059;--gold-light:#e8c875;--gold-dark:#9a7b3c;--text:#f7f4ee;--text-muted:rgba(247,244,238,0.6);--danger:#c2410c;--success:#22c55e;}
+        body{background:var(--black);min-height:100vh;}
+        
+        .app-layout{display:flex;min-height:100vh;}
+        .sidebar{width:280px;background:linear-gradient(180deg,var(--black),var(--black-soft));color:var(--text);padding:25px 20px;position:fixed;height:100vh;overflow-y:auto;z-index:100;border-right:1px solid rgba(197,160,89,0.15);}
+        .sidebar-logo{width:80px;height:80px;margin:0 auto 20px;border-radius:50%;overflow:hidden;background:var(--black);border:2px solid var(--gold);}
+        .sidebar-logo img{width:100%;height:100%;object-fit:cover;}
+        .sidebar-title{font-size:22px;text-align:center;font-weight:700;margin-bottom:5px;background:linear-gradient(135deg,var(--gold),var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .sidebar-subtitle{font-size:11px;text-align:center;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:30px;}
+        .menu-title{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin:25px 0 10px;padding-left:12px;font-weight:600;}
+        .menu-link{display:flex;align-items:center;gap:12px;padding:14px 16px;color:var(--text-muted);text-decoration:none;border-radius:12px;margin-bottom:4px;transition:all 0.3s;font-size:14px;}
+        .menu-link:hover{background:rgba(197,160,89,0.1);color:var(--text);}
+        .menu-link.active{background:var(--gold);color:var(--black);font-weight:600;}
+        .user-section{margin-top:auto;padding-top:25px;border-top:1px solid rgba(197,160,89,0.15);}
+        .user-email{font-size:12px;color:var(--text-muted);margin-bottom:15px;}
+        .logout-btn{width:100%;padding:14px;background:transparent;color:var(--text-muted);border:1px solid rgba(197,160,89,0.3);border-radius:12px;cursor:pointer;font-weight:600;transition:all 0.3s;}
+        .logout-btn:hover{background:var(--gold);color:var(--black);border-color:var(--gold);}
+        
+        .main{flex:1;margin-left:280px;padding:30px 35px;background:var(--black);}
+        .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:35px;flex-wrap:wrap;gap:20px;}
+        .page-title{font-size:32px;color:var(--text);font-weight:700;font-family:'Cormorant Garamond',serif;}
+        .menu-toggle{display:none;padding:14px;background:var(--black-soft);color:var(--gold);border:1px solid var(--gold);border-radius:12px;cursor:pointer;font-size:20px;}
+        
+        .btn-new{padding:12px 24px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--black);border:none;border-radius:12px;cursor:pointer;font-weight:600;transition:all 0.3s;}
+        .btn-new:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(197,160,89,0.3);}
+        .btn-secondary{padding:12px 24px;background:var(--black-soft);color:var(--gold);border:1px solid var(--gold);border-radius:12px;cursor:pointer;font-weight:600;}
+        
+        .header-buttons{display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;}
+        .filters{display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+        .filters input{padding:12px 16px;background:var(--black-soft);border:1px solid rgba(197,160,89,0.2);border-radius:12px;color:var(--text);font-size:14px;}
+        .filters label{color:var(--text-muted);font-size:13px;font-weight:600;}
+        
+        .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:35px;}
+        .stat-card{background:var(--black-soft);padding:28px;border-radius:20px;border:1px solid rgba(197,160,89,0.15);}
+        .stat-value{font-size:38px;font-weight:800;color:var(--gold-light);font-family:'Cormorant Garamond',serif;}
+        .stat-value.rojo{color:var(--danger);}
+        .stat-label{color:var(--text-muted);font-size:13px;margin-top:8px;text-transform:uppercase;}
+        
+        .card{background:var(--black-soft);padding:28px;border-radius:20px;border:1px solid rgba(197,160,89,0.15);}
+        .card-title{font-size:18px;font-weight:700;margin-bottom:22px;color:var(--text);}
+        table{width:100%;border-collapse:collapse;}
+        th,td{padding:16px 14px;text-align:left;border-bottom:1px solid rgba(197,160,89,0.1);font-size:14px;color:var(--text);}
+        th{font-size:10px;text-transform:uppercase;color:var(--text-muted);}
+        
+        .rojo{color:var(--danger);font-weight:700;}
+        .verde{color:var(--success);font-weight:700;}
+        .badge{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;}
+        .badge-green{background:rgba(34,197,94,0.2);color:#22c55e;}
+        .badge-red{background:rgba(194,65,12,0.2);color:var(--danger);}
+        .badge-yellow{background:rgba(234,179,8,0.2);color:#eab308;}
+        
+        .btn-action{padding:8px 10px;border:none;border-radius:8px;cursor:pointer;margin-right:4px;font-size:12px;}
+        .btn-print{background:var(--gold);color:var(--black);}
+        .btn-edit{background:#3498db;color:white;}
+        .btn-wa{background:#25D366;color:white;}
+        .btn-abono{background:#eab308;color:black;}
+        .btn-delete{background:var(--danger);color:white;}
+        
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;align-items:center;justify-content:center;}
+        .modal.active{display:flex;}
+        .modal-content{background:var(--black-soft);padding:30px;border-radius:20px;width:100%;max-width:550px;max-height:90vh;overflow-y:auto;border:1px solid rgba(197,160,89,0.15);}
+        .modal-title{font-size:20px;font-weight:700;margin-bottom:25px;color:var(--text);}
+        
+        .form-group{margin-bottom:20px;}
+        .form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;}
+        .form-group input,.form-group select{width:100%;padding:14px 16px;background:var(--black);border:1px solid rgba(197,160,89,0.2);border-radius:12px;color:var(--text);font-size:15px;}
+        .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--gold);}
+        
+        .item-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;margin-bottom:10px;}
+        .item-row input,.item-row select{padding:12px;border:1px solid rgba(197,160,89,0.2);border-radius:10px;background:var(--black);color:var(--text);}
+        .btn-add-item{padding:12px 20px;background:var(--gold);color:var(--black);border:none;border-radius:10px;cursor:pointer;font-weight:600;margin-bottom:15px;}
+        .btn-remove{padding:10px 14px;background:var(--danger);color:white;border:none;border-radius:10px;cursor:pointer;}
+        
+        .total-box{text-align:right;padding:20px;background:var(--black);border-radius:12px;margin:15px 0;}
+        .total-label{color:var(--text-muted);font-size:14px;}
+        .total-value{font-size:32px;font-weight:700;color:var(--success);}
+        
+        .modal-btns{display:flex;gap:15px;margin-top:25px;}
+        .btn-save{flex:1;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--black);border:none;border-radius:12px;cursor:pointer;font-weight:600;}
+        .btn-cancel{flex:1;padding:14px;background:transparent;border:1px solid rgba(197,160,89,0.3);color:var(--text-muted);border-radius:12px;cursor:pointer;font-weight:600;}
+        
+        @media(max-width:1200px){.stats{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:900px){.sidebar{transform:translateX(-100%);width:280px;transition:transform 0.3s;}.sidebar.open{transform:translateX(0);}.main{margin-left:0;padding:25px 20px;}.menu-toggle{display:block;}.item-row{grid-template-columns:1fr;}}
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- RESTO DEL HTML IGUAL QUE TENÍAS, PERO CORRIGUIENDO EL ERROR DEL CSS EN .sidebar-title -->
+    <div class="app-layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-logo"><img src="assets/logo.jpeg"></div>
+            <div class="sidebar-title">Atelier NILAR</div>
+            <div class="sidebar-subtitle">Moda y Estilo</div>
+            <div class="menu-title">Principal</div><a href="dashboard.html" class="menu-link">📊 Dashboard</a>
+            <div class="menu-title">Gestión</div><a href="clientes.html" class="menu-link">👥 Clientes</a><a href="productos.html" class="menu-link">📦 Productos</a><a href="ventas.html" class="menu-link active">💰 Ventas</a><a href="compras.html" class="menu-link">🛒 Compras</a>
+            <div class="menu-title">Operaciones</div><a href="inventario.html" class="menu-link">📋 Inventario</a><a href="distribuciones.html" class="menu-link">🚚 Distribución</a>
+            <div class="menu-title">Sistema</div><a href="admin.html" class="menu-link">⚙️ Admin</a>
+            <div class="user-section"><div class="user-email" id="userEmail">Cargando...</div><button class="logout-btn" onclick="cerrarSesion()">Cerrar Sesión</button></div>
+        </aside>
+        
+        <main class="main">
+            <div class="header"><button class="menu-toggle" onclick="toggleSidebar()">☰</button><h1 class="page-title">💰 Ventas</h1></div>
+            <div class="header-buttons">
+                <button class="btn-new" onclick="abrirModalVenta()">➕ Nueva Venta</button>
+                <button class="btn-secondary" onclick="imprimirReporte()">🖨️ Reporte</button>
+            </div>
+            <div class="filters">
+                <label>Desde:</label>
+                <input type="date" id="fechaDesde" onchange="filtrar()">
+                <label>Hasta:</label>
+                <input type="date" id="fechaHasta" onchange="filtrar()">
+                <button onclick="limpiarFiltro()" style="padding:12px 20px;background:var(--black-soft);color:var(--text-muted);border:1px solid rgba(197,160,89,0.2);border-radius:12px;cursor:pointer;">Limpiar</button>
+            </div>
+            <div class="stats">
+                <div class="stat-card"><div class="stat-value" id="ventasFiltradas">0</div><div class="stat-label">Ventas</div></div>
+                <div class="stat-card"><div class="stat-value" id="totalFiltrado">$0</div><div class="stat-label">Total</div></div>
+                <div class="stat-card"><div class="stat-value rojo" id="pendienteFiltrado">$0</div><div class="stat-label">Pendiente</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">Historial de Ventas</div>
+                <table><thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pagado</th><th>Deuda</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tabla"></tbody></table>
+            </div>
+        </main>
+    </div>
+    
+    <div class="modal" id="modalVenta">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTituloVenta">➕ Nueva Venta</div>
+            <input type="hidden" id="ventaId">
+            <div class="form-group"><label>Cliente *</label><select id="cliente"></select></div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="fecha"></div>
+            <label style="font-size:13px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:10px;">Productos</label>
+            <div id="items"></div>
+            <button class="btn-add-item" onclick="agregarItem()">+ Agregar</button>
+            <div class="form-group"><label>Descuento ($)</label><input type="number" id="descuento" value="0" oninput="calcularTotal()"></div>
+            <div class="total-box"><div class="total-label">Total:</div><div class="total-value" id="totalVenta">$0</div></div>
+            <div class="form-group"><label>Pagado ($)</label><input type="number" id="pagado" value="0"></div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="cerrarModalVenta()">Cancelar</button>
+                <button class="btn-save" onclick="guardarVenta()">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="modalVer">
+        <div class="modal-content">
+            <div class="modal-title">Detalle de Venta</div>
+            <div id="detalleVenta"></div>
+            <div class="modal-btns"><button class="btn-cancel" onclick="cerrarModalVer()">Cerrar</button></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="modalAbono">
+        <div class="modal-content">
+            <div class="modal-title">💰 Registrar Abono</div>
+            <input type="hidden" id="abonoVentaId">
+            <div class="form-group"><label>Monto ($)</label><input type="number" id="montoAbono" value="0"></div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="cerrarModalAbono()">Cancelar</button>
+                <button class="btn-save" onclick="registrarAbono()">✅ Confirmar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import{initializeApp}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import{getAuth,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import{getFirestore,collection,getDocs,addDoc,updateDoc,doc,writeBatch,increment}from"https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+              const config={apiKey:"AIzaSyB-uiv9yD-NB3Ex288Qb37Du5VgKKuDyfo",authDomain:"nilaratelier.firebaseapp.com",projectId:"nilaratelier",storageBucket:"nilaratelier.firebasestorage.app",messagingSenderId:"914021817740",appId:"1:914021817740:web:fc5c1ff57c1caa3f42caa9"};
+
+const app=initializeApp(config),auth=getAuth(app),db=getFirestore(app);
+let clientes=[],productos=[],ventas=[],ventasFiltradas=[];
+
+window.toggleSidebar=()=>document.getElementById('sidebar').classList.toggle('open');
+
+const CACHE_KEY='nilar_cache_ventas';
+const loadCache=()=>{try{const c=JSON.parse(localStorage.getItem(CACHE_KEY));if(c){clientes=c.clientes||[];productos=c.productos||[];ventas=c.ventas||[];document.getElementById('userEmail').textContent=c.userEmail||'';filtrar()}}catch(e){}};
+const saveCache=()=>{try{localStorage.setItem(CACHE_KEY,JSON.stringify({clientes,productos,ventas,userEmail:document.getElementById('userEmail').textContent}))}catch(e){}};
+
+onAuthStateChanged(auth,async user=>{if(!user){location.href='index.html';return}
+document.getElementById('userEmail').textContent=user.email;loadCache();await cargar(true);});
+
+async function cargar(background=false){
+    try{
+        const[cSnap,pSnap,vSnap]=await Promise.all([getDocs(collection(db,'clientes')),getDocs(collection(db,'productos')),getDocs(collection(db,'ventas'))]);
+        clientes=cSnap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.activo!==false);
+        productos=pSnap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.activo!==false);
+        ventas=vSnap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.activo!==false);
+        saveCache();filtrar();
+    }catch(e){if(!background)alert('Error: '+e.message)}
+}
+
+function filtrar(){
+    const desde=document.getElementById('fechaDesde').value;
+    const hasta=document.getElementById('fechaHasta').value;
+    ventasFiltradas=ventas;
+    if(desde&&hasta)ventasFiltradas=ventas.filter(v=>v.fecha>=desde&&v.fecha<=hasta);
+    else if(desde)ventasFiltradas=ventas.filter(v=>v.fecha>=desde);
+    else if(hasta)ventasFiltradas=ventas.filter(v=>v.fecha<=hasta);
+    ventasFiltradas.sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+    document.getElementById('ventasFiltradas').textContent=ventasFiltradas.length;
+    document.getElementById('totalFiltrado').textContent='$'+ventasFiltradas.reduce((s,v)=>s+(v.total||0),0).toLocaleString();
+    document.getElementById('pendienteFiltrado').textContent='$'+ventasFiltradas.reduce((s,v)=>s+((v.total||0)-(v.pagado||0)),0).toLocaleString();
+    renderizar();
+}
+
+function renderizar(){
+    const tbody=document.getElementById('tabla');
+    if(!ventasFiltradas.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#888;">Sin ventas</td></tr>';return}
+    tbody.innerHTML=ventasFiltradas.map(v=>{
+        const cli=clientes.find(c=>c.id===v.clienteId);
+        const deuda=(v.total||0)-(v.pagado||0);
+        const badge=deuda===0?'badge-green':(v.pagado||0)>0?'badge-yellow':'badge-red';
+        const estado=deuda===0?'Pagado':(v.pagado||0)>0?'Parcial':'Pendiente';
+        return '<tr>'+
+            '<td style="color:var(--text-muted);">'+(v.fecha||'-').substring(0,10)+'</td>'+
+            '<td style="color:var(--gold-light);font-weight:600;">'+(cli?.nombre||'-')+'</td>'+
+            '<td style="font-weight:600;">$'+(v.total||0).toLocaleString()+'</td>'+
+            '<td class="verde">$'+(v.pagado||0).toLocaleString()+'</td>'+
+            '<td class="'+(deuda>0?'rojo':'verde')+'">$'+deuda.toLocaleString()+'</td>'+
+            '<td><span class="badge '+badge+'">'+estado+'</span></td>'+
+            '<td>'+
+                '<button class="btn-action btn-print" onclick="verVenta(\''+v.id+'\')">👁️</button>'+
+                '<button class="btn-action btn-edit" onclick="editarVenta(\''+v.id+'\')">✏️</button>'+
+                '<button class="btn-action btn-wa" onclick="whatsapp(\''+v.id+'\')">💬</button>'+
+                '<button class="btn-action btn-abono" onclick="abrirAbono(\''+v.id+'\')">💰</button>'+
+                '<button class="btn-action btn-delete" onclick="eliminarVenta(\''+v.id+'\')">🗑️</button>'+
+            '</td></tr>'}).join('');
+}
+
+window.limpiarFiltro=()=>{document.getElementById('fechaDesde').value='';document.getElementById('fechaHasta').value='';filtrar();};
+
+window.abrirModalVenta = () => {
+    document.getElementById('ventaId').value = '';
+    
+    // Verificar que clientes es un array válido
+    const clienteOptions = Array.isArray(clientes)
+        ? '<option value="">Seleccionar</option>' + clientes.map(c => '<option value="' + (c.id || '') + '">' + (c.nombre || 'Sin nombre') + '</option>').join('')
+        : '<option value="">Seleccionar</option>';
+    
+    document.getElementById('cliente').innerHTML = clienteOptions;
+    document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('items').innerHTML = '';
+    agregarItem();
+    document.getElementById('descuento').value = '0';
+    document.getElementById('pagado').value = '0';
+    document.getElementById('totalVenta').textContent = '$0';
+    document.getElementById('modalTituloVenta').textContent = '➕ Nueva Venta';
+    document.getElementById('modalVenta').classList.add('active');
+};
+
+window.cerrarModalVenta=()=>document.getElementById('modalVenta').classList.remove('active');
+window.cerrarModalVer=()=>document.getElementById('modalVer').classList.remove('active');
+window.cerrarModalAbono=()=>document.getElementById('modalAbono').classList.remove('active');
+
+// En agregarItem - agregar verificación
+window.agregarItem = () => {
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    
+    // Verificar que productos es un array válido
+    const prodOptions = Array.isArray(productos) 
+        ? productos.map(p => '<option value="' + (p.id || '') + '" data-precio="' + (p.precioVenta || 0) + '">' + (p.nombre || 'Sin nombre') + '</option>').join('')
+        : '';
+    
+    div.innerHTML = '<select class="prod-select"><option value="">Producto</option>' + prodOptions + '</select>' +
+        '<input type="number" class="cant-input" value="1" min="1">' +
+        '<input type="number" class="prec-input" value="0">' +
+        '<button class="btn-remove" onclick="this.parentElement.remove();calcularTotal();">X</button>';
+    document.getElementById('items').appendChild(div);
+    
+    div.querySelector('.prod-select').addEventListener('change', e => {
+        const selected = e.target.selectedOptions[0];
+        div.querySelector('.prec-input').value = selected?.dataset.precio || 0;
+        calcularTotal();
+    });
+    
+    div.querySelectorAll('input').forEach(i => i.addEventListener('input', calcularTotal));
+};
+window.calcularTotal=()=>{
+    let total=0;
+    document.querySelectorAll('.item-row').forEach(row=>{total+=(parseInt(row.querySelector('.cant-input').value)||0)*(parseFloat(row.querySelector('.prec-input').value)||0);});
+    const descuento=parseFloat(document.getElementById('descuento').value)||0;
+    total=total-descuento;
+    if(total<0)total=0;
+    document.getElementById('totalVenta').textContent='$'+total.toLocaleString();
+};
+
+window.verVenta = (id) => {
+    const v = ventas.find(x => x.id === id);
+    const cli = clientes.find(c => c.id === v.clienteId);
+    const deuda = (v.total || 0) - (v.pagado || 0);
+    let html = '';
+    
+    // Cliente - color dorado claro
+    html += '<p style="color:#e8c875;font-size:20px;font-weight:700;margin-bottom:15px;">' + (cli?.nombre || '-') + '</p>';
+    
+    // Fecha - color muted claro
+    html += '<p style="color:rgba(247,244,238,0.6);margin-bottom:10px;">📅 Fecha: ' + (v.fecha || '-') + '</p>';
+    
+    // Total - grande y dorado
+    html += '<p style="color:#e8c875;font-size:24px;font-weight:700;margin:15px 0;">Total: $' + (v.total || 0).toLocaleString() + '</p>';
+    
+    // Pagado - verde
+    html += '<p style="color:#22c55e;font-size:16px;font-weight:600;">✅ Pagado: $' + (v.pagado || 0).toLocaleString() + '</p>';
+    
+    // Deuda - rojo o verde según corresponda
+    html += '<p style="color:' + (deuda > 0 ? '#ef4444' : '#22c55e') + ';font-size:16px;font-weight:700;">' + (deuda > 0 ? '❌' : '✅') + ' Deuda: $' + deuda.toLocaleString() + '</p>';
+    
+    // Línea separadora
+    html += '<hr style="border:none;border-top:1px solid rgba(197,160,89,0.2);margin:15px 0;">';
+    
+    // Items
+    html += '<div style="margin-top:10px;">';
+    (v.items || []).forEach(i => {
+        html += '<p style="color:var(--text);padding:8px 0;border-bottom:1px solid rgba(197,160,89,0.1);">';
+        html += '• ' + i.nombre + ' <span style="color:rgba(247,244,238,0.6);">x' + i.cantidad + '</span> ';
+        html += '<span style="color:#e8c875;font-weight:600;">$' + (i.subtotal || 0).toLocaleString() + '</span>';
+        html += '</p>';
+    });
+    html += '</div>';
+    
+    document.getElementById('detalleVenta').innerHTML = html;
+    document.getElementById('modalVer').classList.add('active');
+};
+
+window.editarVenta=(id)=>{
+    const v=ventas.find(x=>x.id===id);
+    document.getElementById('ventaId').value=id;
+    document.getElementById('cliente').innerHTML='<option value="">Seleccionar</option>'+clientes.map(c=>'<option value="'+c.id+'" '+(c.id===v.clienteId?'selected':'')+'>'+c.nombre+'</option>').join('');
+    document.getElementById('fecha').value=v.fecha||'';
+    document.getElementById('items').innerHTML='';
+    (v.items||[]).forEach(i=>{
+        const div=document.createElement('div');
+        div.className='item-row';
+        div.innerHTML='<select class="prod-select"><option value="">Producto</option>'+productos.map(p=>'<option value="'+p.id+'" data-precio="'+(p.precioVenta||0)+'" '+(p.id===i.productoId?'selected':'')+'>'+p.nombre+'</option>').join('')+'</select>'+
+            '<input type="number" class="cant-input" value="'+i.cantidad+'" min="1">'+
+            '<input type="number" class="prec-input" value="'+i.precio+'">'+
+            '<button class="btn-remove" onclick="this.parentElement.remove();calcularTotal();">X</button>';
+        document.getElementById('items').appendChild(div);
+    });
+    document.getElementById('descuento').value=v.descuento||0;
+    document.getElementById('pagado').value=v.pagado||0;
+    calcularTotal();
+    document.getElementById('modalTituloVenta').textContent='✏️ Editar Venta';
+    document.getElementById('modalVenta').classList.add('active');
+};
+
+window.whatsapp=(id)=>{
+    const v=ventas.find(x=>x.id===id);
+    const cli=clientes.find(c=>c.id===v.clienteId);
+    let msg='*RESUMEN DE COMPRA*\n\n';
+    (v.items||[]).forEach(i=>msg+='• '+i.nombre+' x'+i.cantidad+' = $'+i.subtotal.toLocaleString()+'\n');
+    msg+='\n*TOTAL: $'+(v.total||0).toLocaleString()+'*\nGracias!';
+    const tel=cli?.telefono||'';
+    if(tel)window.open('https://wa.me/'+tel.replace(/\D/g,'')+'?text='+encodeURIComponent(msg),'_blank');
+    else alert('Cliente sin teléfono');
+};
+
+window.abrirAbono=(id)=>{
+    const v=ventas.find(x=>x.id===id);
+    document.getElementById('abonoVentaId').value=id;
+    document.getElementById('montoAbono').value=(v.total||0)-(v.pagado||0);
+    document.getElementById('modalAbono').classList.add('active');
+};
+
+window.registrarAbono = async () => {
+    const id = document.getElementById('abonoVentaId').value;
+    const monto = parseFloat(document.getElementById('montoAbono').value) || 0;
+    if (monto <= 0) return alert('Monto inválido');
+    const v = ventas.find(x => x.id === id);
+    await updateDoc(doc(db, 'ventas', id), { pagado: (v.pagado || 0) + monto });
+    await updateDoc(doc(db, 'clientes', v.clienteId), {
+        totalComprado: increment(monto),
+        deudaTotal: increment(monto * -1)
+    });
+    cerrarModalAbono();
+    await cargar();
+    alert('✅ Abono registrado');
+};
+
+window.eliminarVenta = async (id) => {
+    if (!confirm('¿Eliminar esta venta?')) return;
+    const v = ventas.find(x => x.id === id);
+    try {
+        const batch = writeBatch(db);
+        (v.items || []).forEach(i => batch.update(doc(db, 'productos', i.productoId), { stock: increment(i.cantidad) }));
+        batch.update(doc(db, 'clientes', v.clienteId), {
+            totalComprado: increment((v.total || 0) * -1),
+            deudaTotal: increment(((v.total || 0) - (v.pagado || 0)) * -1)
+        });
+        batch.delete(doc(db, 'ventas', id));
+        await batch.commit();
+        await cargar();
+        alert('✅ Venta eliminada');
+    } catch (e) { alert('Error: ' + e.message); }
+};
+
+window.guardarVenta=async()=>{
+    const clienteId=document.getElementById('cliente').value;
+    if(!clienteId)return alert('Selecciona un cliente');
+    const items=[],rows=document.querySelectorAll('.item-row');
+    let total=0;
+    rows.forEach(row=>{
+        const prodId=row.querySelector('.prod-select').value;
+        if(!prodId)return;
+        const prod=productos.find(p=>p.id===prodId);
+        const cant=parseInt(row.querySelector('.cant-input').value)||0;
+        const prec=parseFloat(row.querySelector('.prec-input').value)||0;
+        if(cant>0){items.push({productoId:prodId,nombre:prod.nombre,cantidad:cant,precio:prec,subtotal:cant*prec});total+=cant*prec}
+    });
+    if(items.length===0)return alert('Agrega productos');
+    const descuento=parseFloat(document.getElementById('descuento').value)||0;
+    total=total-descuento;
+    if(total<0)total=0;
+    const cli=clientes.find(c=>c.id===clienteId);
+    const pagado=parseFloat(document.getElementById('pagado').value)||0;
+    const ventaId=document.getElementById('ventaId').value;
+    
+    try{
+        if(ventaId){
+            const vOriginal=ventas.find(x=>x.id===ventaId);
+            const batch=writeBatch(db);
+            // Devolver stock anterior
+            (vOriginal.items||[]).forEach(i=>batch.update(doc(db,'productos',i.productoId),{stock:increment(i.cantidad)}));
+            // Descontar cliente anterior
+            batch.update(doc(db,'clientes',vOriginal.clienteId,{totalComprado:increment((vOriginal.total||0)*-1),deudaTotal:increment(((vOriginal.total||0)-(vOriginal.pagado||0))*-1)}));
+            // Actualizar venta
+            batch.update(doc(db,'ventas',ventaId,{clienteId,clienteNombre:cli.nombre,items,total,descuento,pagado,fecha:document.getElementById('fecha').value,fechaModificacion:new Date().toISOString()}));
+            // Descontar nuevo stock
+            items.forEach(it=>batch.update(doc(db,'productos',it.productoId),{stock:increment(it.cantidad*-1)}));
+            // Sumar cliente nuevo
+            batch.update(doc(db,'clientes',clienteId,{totalComprado:increment(total),deudaTotal:increment(Math.max(total-pagado,0))}));
+            await batch.commit();
+        }else{
+            await addDoc(collection(db,'ventas'),{clienteId,clienteNombre:cli.nombre,items,total,descuento,pagado,fecha:document.getElementById('fecha').value,activo:true,fechaCreacion:new Date().toISOString()});
+            const batch=writeBatch(db);
+            items.forEach(it=>batch.update(doc(db,'productos',it.productoId),{stock:increment(it.cantidad*-1)}));
+            batch.update(doc(db,'clientes',clienteId,{totalComprado:increment(total),deudaTotal:increment(Math.max(total-pagado,0))}));
+            await batch.commit();
+        }
+        cerrarModalVenta();await cargar();alert('✅ Venta guardada');
+    }catch(e){alert('Error: '+e.message)}
+};
+
+window.imprimirReporte=()=>{
+    const win=window.open('','_blank');
+    let html='<html><head><title>Reporte</title></head><body style="font-family:Arial;padding:20px;">'+
+        '<h2 style="text-align:center;">REPORTE DE VENTAS</h2>'+
+        '<table style="width:100%;border-collapse:collapse;"><tr style="background:#1e3a2f;color:white;"><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pagado</th><th>Deuda</th></tr>';
+    ventasFiltradas.forEach(v=>{const cli=clientes.find(c=>c.id===v.clienteId);html+='<tr><td>'+(v.fecha||'-')+'</td><td>'+(cli?.nombre||'-')+'</td><td>$'+(v.total||0).toLocaleString()+'</td><td>$'+(v.pagado||0).toLocaleString()+'</td><td>$'+((v.total||0)-(v.pagado||0)).toLocaleString()+'</td></tr>'});
+    html+='</table></body></html>';
+    win.document.write(html);win.document.close();win.print();
+};
+
+window.cerrarSesion=async()=>{if(confirm('¿Cerrar sesión?')){await signOut(auth);location.href='index.html';}};
+    </script>
+</body>
+</html>

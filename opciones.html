@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración | Atelier NILAR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f5f5f5; }
+        .container { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: #1e3a2f; color: white; padding: 20px; position: fixed; height: 100%; }
+        .logo { font-size: 28px; text-align: center; margin-bottom: 25px; }
+        .menu-title { font-size: 11px; color: #888; text-transform: uppercase; margin: 20px 0 8px; }
+        .menu-link { display: block; padding: 10px 12px; color: #ccc; text-decoration: none; border-radius: 6px; margin-bottom: 4px; }
+        .menu-link:hover { background: rgba(255,255,255,0.1); }
+        .menu-link.active { background: #2d5a44; color: white; }
+        .user-info { margin-top: auto; padding-top: 20px; border-top: 1px solid #333; }
+        .main { flex: 1; margin-left: 240px; padding: 25px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .page-title { font-size: 24px; color: #333; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .user-display { font-size: 14px; color: #666; }
+        .btn-logout { padding: 10px 20px; background: #c0392b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #333; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #333; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .btn-save { padding: 12px 24px; background: #27ae60; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #ccc; transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background: #27ae60; }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .info-box { padding: 15px; background: #e8f4fd; border-radius: 8px; border-left: 4px solid #3498db; margin-bottom: 15px; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } }
+    </style>
+    <link rel="stylesheet" href="css/nilar-theme.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><img src="assets/logo.jpeg" alt="Atelier NILAR — Moda y Estilo"></div>
+            <div class="menu-title">Principal</div>
+            <a href="dashboard.html" class="menu-link">📊 Dashboard</a>
+            <div class="menu-title">Gestión</div>
+            <a href="clientes.html" class="menu-link">👥 Clientes</a>
+            <a href="productos.html" class="menu-link">📦 Productos</a>
+            <a href="ventas.html" class="menu-link">💰 Ventas</a>
+            <a href="compras.html" class="menu-link">🛒 Compras</a>
+            <div class="menu-title">Operaciones</div>
+            <a href="inventario.html" class="menu-link">📋 Inventario</a>
+            <a href="distribuciones.html" class="menu-link">🚚 Distribución</a>
+            <div class="menu-title">Sistema</div>
+            <a href="admin.html" class="menu-link">⚙️ Admin</a>
+            <a href="opciones.html" class="menu-link active">⚙️ Opciones</a>
+            <div class="user-info">
+                <div id="userEmail" style="font-size:12px;color:#ccc;">---</div>
+                <button class="btn-logout" onclick="cerrarSesion()" style="width:100%;margin-top:10px;">🚪 Cerrar Sesión</button>
+            </div>
+        </aside>
+        <main class="main">
+            <div class="header">
+                <h1 class="page-title">⚙️ Configuración</h1>
+                <div class="header-right">
+                    <span class="user-display" id="userDisplay">---</span>
+                    <button class="btn-logout" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Información del Sistema</div>
+                <div class="info-box">
+                    <strong>Nombre del Sistema:</strong> Atelier NILAR<br>
+                    <strong>Tagline:</strong> Moda y Estilo<br>
+                    <strong>Versión:</strong> 1.0.0<br>
+                    <strong>Firebase:</strong> Conectado
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">🔐 Seguridad</div>
+                <div class="form-group">
+                    <label class="switch">
+                        <input type="checkbox" id="sesionDiaria">
+                        <span class="slider"></span>
+                    </label>
+                    <span style="margin-left: 10px;">Cerrar sesión diariamente (forzar nuevo ingreso cada día)</span>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">⚡ Rendimiento</div>
+                <div class="form-group">
+                    <label class="switch">
+                        <input type="checkbox" id="cacheHabilitado">
+                        <span class="slider"></span>
+                    </label>
+                    <span style="margin-left: 10px;">Habilitar caché (carga más rápida)</span>
+                </div>
+            </div>
+            <button class="btn-save" onclick="guardarConfig()">💾 Guardar Configuración</button>
+        </main>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { firebaseConfig } from "./js/firebase-config.js";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = 'index.html'; return; }
+            document.getElementById('userEmail').textContent = user.email;
+            document.getElementById('userDisplay').textContent = user.email;
+            // Cargar configuración
+            const configDoc = await getDoc(doc(db, 'configuracion', 'sistema'));
+            if (configDoc.exists()) {
+                const data = configDoc.data();
+                document.getElementById('sesionDiaria').checked = data.sesionDiaria || false;
+                document.getElementById('cacheHabilitado').checked = data.cache || false;
+            }
+        });
+        window.guardarConfig = async () => {
+            const sesionDiaria = document.getElementById('sesionDiaria').checked;
+            const cache = document.getElementById('cacheHabilitado').checked;
+            await setDoc(doc(db, 'configuracion', 'sistema'), {
+                sesionDiaria,
+                cache,
+                fechaModificacion: new Date().toISOString()
+            });
+            alert('✅ Configuración guardada');
+        };
+        window.cerrarSesion = async () => {
+            if (confirm('¿Cerrar sesión?')) {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            }
+        };
+    </script>
+</body>
+</html>

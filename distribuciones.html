@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distribuciones | Atelier NILAR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f5f5f5; }
+        .container { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: #1e3a2f; color: white; padding: 20px; position: fixed; height: 100%; }
+        .logo { font-size: 28px; text-align: center; margin-bottom: 25px; }
+        .menu-title { font-size: 11px; color: #888; text-transform: uppercase; margin: 20px 0 8px; }
+        .menu-link { display: block; padding: 10px 12px; color: #ccc; text-decoration: none; border-radius: 6px; margin-bottom: 4px; }
+        .menu-link:hover { background: rgba(255,255,255,0.1); }
+        .menu-link.active { background: #2d5a44; color: white; }
+        .user-info { margin-top: auto; padding-top: 20px; border-top: 1px solid #333; }
+        .logout-btn { width: 100%; padding: 10px; background: #c0392b; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        .main { flex: 1; margin-left: 240px; padding: 25px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .page-title { font-size: 24px; color: #333; }
+        .btn-new { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #1e3a2f; }
+        .stat-value.azul { color: #3498db; }
+        .stat-value.naranja { color: #e67e22; }
+        .stat-value.verde { color: #27ae60; }
+        .stat-label { color: #666; font-size: 13px; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { font-size: 11px; text-transform: uppercase; color: #888; }
+        .rojo { color: #e74c3c; font-weight: 600; }
+        .verde { color: #27ae60; font-weight: 600; }
+        .naranja { color: #e67e22; font-weight: 600; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+        .badge-pendiente { background: #fff3cd; color: #856404; }
+        .badge-entregado { background: #d4edda; color: #155724; }
+        .badge-encurso { background: #cce5ff; color: #004085; }
+        .badge-cancelado { background: #f8d7da; color: #721c24; }
+        
+        .btn-edit { padding: 6px 10px; background: #ffc107; border: none; border-radius: 4px; cursor: pointer; margin-right: 4px; }
+        .btn-delete { padding: 6px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-save { flex: 1; padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        .btn-cancel { flex: 1; padding: 12px; background: #666; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } .stats { grid-template-columns: 1fr 1fr; } }
+    </style>
+    <link rel="stylesheet" href="css/nilar-theme.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><img src="assets/logo.jpeg" alt="Atelier NILAR — Moda y Estilo"></div>
+            <div class="menu-title">Principal</div>
+            <a href="dashboard.html" class="menu-link">📊 Dashboard</a>
+            <div class="menu-title">Gestión</div>
+            <a href="clientes.html" class="menu-link">👥 Clientes</a>
+            <a href="productos.html" class="menu-link">📦 Productos</a>
+            <a href="ventas.html" class="menu-link">💰 Ventas</a>
+            <a href="compras.html" class="menu-link">🛒 Compras</a>
+            <div class="menu-title">Operaciones</div>
+            <a href="inventario.html" class="menu-link">📋 Inventario</a>
+            <a href="distribuciones.html" class="menu-link active">🚚 Distribución</a>
+            <div class="menu-title">Sistema</div>
+            <a href="admin.html" class="menu-link">⚙️ Admin</a>
+            <div class="user-info">
+                <div id="userEmail" style="font-size:12px;color:#ccc;"></div>
+                <button class="logout-btn" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+            </div>
+        </aside>
+        <main class="main">
+            <div class="header">
+                <h1 class="page-title">🚚 Distribuciones</h1>
+                <button class="btn-new" onclick="abrirModal()">➕ Nueva Distribución</button>
+            </div>
+            <div class="stats">
+                <div class="stat-card"><div class="stat-value" id="totalDist">0</div><div class="stat-label">Total</div></div>
+                <div class="stat-card"><div class="stat-value naranja" id="pendientes">0</div><div class="stat-label">Pendientes</div></div>
+                <div class="stat-card"><div class="stat-value azul" id="enCurso">0</div><div class="stat-label">En Curso</div></div>
+                <div class="stat-card"><div class="stat-value verde" id="entregados">0</div><div class="stat-label">Entregados</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Historial de Distribuciones</div>
+                <table>
+                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Dirección</th><th>Estado</th><th>Notas</th><th>Acción</th></tr></thead>
+                    <tbody id="tabla"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitulo">➕ Nueva Distribución</div>
+            <input type="hidden" id="distId">
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cliente *</label>
+                    <select id="clienteId">
+                        <option value="">Seleccionar cliente...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="estado">
+                        <option value="pendiente">Pendiente</option>
+                        <option value="enCurso">En Curso</option>
+                        <option value="entregado">Entregado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Dirección de entrega</label>
+                <input type="text" id="direccion" placeholder="Dirección completa">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="fecha">
+                </div>
+                <div class="form-group">
+                    <label>Hora</label>
+                    <input type="time" id="hora">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Notas</label>
+                <textarea id="notas" rows="3" placeholder="Notas adicionales"></textarea>
+            </div>
+            
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-save" onclick="guardar()">💾 Guardar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        import { firebaseConfig } from "./js/firebase-config.js";
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let distribuciones = [];
+        let clientes = [];
+        
+        const loadCache = () => {
+            try {
+                const cached = JSON.parse(localStorage.getItem('nilar_cache_distribuciones'));
+                if (cached) {
+                    distribuciones = cached.distribuciones || [];
+                    document.getElementById('userEmail').textContent = cached.userEmail || '';
+                    renderizar();
+                }
+            } catch(e) {}
+        };
+        
+        const saveCache = () => {
+            try {
+                localStorage.setItem('nilar_cache_distribuciones', JSON.stringify({ distribuciones, userEmail: document.getElementById('userEmail').textContent }));
+            } catch(e) {}
+        };
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = 'index.html'; return; }
+            document.getElementById('userEmail').textContent = user.email;
+            loadCache();
+            await cargar();
+        });
+        
+        async function cargar() {
+            try {
+                const [distSnap, cliSnap] = await Promise.all([getDocs(collection(db, 'distribuciones')), getDocs(collection(db, 'clientes'))]);
+                distribuciones = distSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                clientes = cliSnap.docs.map(d => ({id: d.id, ...d.data()})).filter(c => c.activo !== false);
+                saveCache();
+                cargarSelect();
+                renderizar();
+            } catch(e) { console.error(e); }
+        }
+        
+        function cargarSelect() {
+            const select = document.getElementById('clienteId');
+            select.innerHTML = '<option value="">Seleccionar cliente...</option>';
+            clientes.forEach(c => {
+                select.innerHTML += '<option value="' + c.id + '">' + c.nombre + '</option>';
+            });
+        }
+        
+        function renderizar() {
+            document.getElementById('totalDist').textContent = distribuciones.length;
+            document.getElementById('pendientes').textContent = distribuciones.filter(d => d.estado === 'pendiente').length;
+            document.getElementById('enCurso').textContent = distribuciones.filter(d => d.estado === 'enCurso').length;
+            document.getElementById('entregados').textContent = distribuciones.filter(d => d.estado === 'entregado').length;
+            
+            const tbody = document.getElementById('tabla');
+            if (distribuciones.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;">Sin distribuciones</td></tr>';
+                return;
+            }
+            
+            // Ordenar por fecha
+            distribuciones.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+            
+            tbody.innerHTML = distribuciones.map(d => {
+                const badgeClass = d.estado === 'pendiente' ? 'badge-pendiente' : d.estado === 'enCurso' ? 'badge-encurso' : d.estado === 'entregado' ? 'badge-entregado' : 'badge-cancelado';
+                const badgeText = d.estado === 'pendiente' ? 'Pendiente' : d.estado === 'enCurso' ? 'En Curso' : d.estado === 'entregado' ? 'Entregado' : 'Cancelado';
+                
+                return '<tr>' +
+                    '<td>' + (d.fecha || '-').substring(0, 10) + '</td>' +
+                    '<td><strong>' + d.clienteNombre + '</strong></td>' +
+                    '<td>' + (d.direccion || '-') + '</td>' +
+                    '<td><span class="badge ' + badgeClass + '">' + badgeText + '</span></td>' +
+                    '<td>' + (d.notas || '-') + '</td>' +
+                    '<td>' +
+                        '<button class="btn-edit" onclick="editar(\'' + d.id + '\')">✏️</button>' +
+                        '<button class="btn-delete" onclick="eliminar(\'' + d.id + '\')">🗑️</button>' +
+                    '</td></tr>';
+            }).join('');
+        }
+        
+        window.abrirModal = () => {
+            document.getElementById('distId').value = '';
+            document.getElementById('clienteId').value = '';
+            document.getElementById('estado').value = 'pendiente';
+            document.getElementById('direccion').value = '';
+            document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('hora').value = '';
+            document.getElementById('notas').value = '';
+            document.getElementById('modalTitulo').textContent = '➕ Nueva Distribución';
+            document.getElementById('modal').classList.add('active');
+        };
+        
+        window.cerrarModal = () => document.getElementById('modal').classList.remove('active');
+        
+        window.editar = (id) => {
+            const d = distribuciones.find(x => x.id === id);
+            document.getElementById('distId').value = id;
+            document.getElementById('clienteId').value = d.clienteId || '';
+            document.getElementById('estado').value = d.estado || 'pendiente';
+            document.getElementById('direccion').value = d.direccion || '';
+            document.getElementById('fecha').value = d.fecha || '';
+            document.getElementById('hora').value = d.hora || '';
+            document.getElementById('notas').value = d.notas || '';
+            document.getElementById('modalTitulo').textContent = '✏️ Editar Distribución';
+                       document.getElementById('modal').classList.add('active');
+        };
+        
+        window.guardar = async () => {
+            const clienteId = document.getElementById('clienteId').value;
+            if (!clienteId) {
+                alert('Selecciona un cliente');
+                return;
+            }
+            
+            const cliente = clientes.find(c => c.id === clienteId);
+            const id = document.getElementById('distId').value;
+            
+            const data = {
+                clienteId,
+                clienteNombre: cliente?.nombre || '-',
+                estado: document.getElementById('estado').value,
+                direccion: document.getElementById('direccion').value.trim(),
+                fecha: document.getElementById('fecha').value,
+                hora: document.getElementById('hora').value,
+                notas: document.getElementById('notas').value.trim(),
+                fechaModificacion: new Date().toISOString()
+            };
+            
+            try {
+                if (id) {
+                    await updateDoc(doc(db, 'distribuciones', id), data);
+                } else {
+                    data.fechaCreacion = new Date().toISOString();
+                    await addDoc(collection(db, 'distribuciones'), data);
+                }
+                
+                cerrarModal();
+                await cargar();
+                alert('✅ Guardado');
+            } catch(e) {
+                console.error('Error:', e);
+                alert('Error: ' + e.message);
+            }
+        };
+        
+        window.eliminar = async (id) => {
+            if (!confirm('¿Eliminar esta distribución?')) return;
+            
+            try {
+                await deleteDoc(doc(db, 'distribuciones', id));
+                await cargar();
+                alert('✅ Eliminado');
+            } catch(e) {
+                console.error('Error:', e);
+                alert('Error: ' + e.message);
+            }
+        };
+        
+        window.cerrarSesion = async () => {
+            if (confirm('¿Cerrar sesión?')) {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            }
+        };
+    </script>
+</body>
+</html>

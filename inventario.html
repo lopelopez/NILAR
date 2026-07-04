@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario | Atelier NILAR</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background: #f5f5f5; }
+        .container { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: #1e3a2f; color: white; padding: 20px; position: fixed; height: 100%; }
+        .logo { font-size: 28px; text-align: center; margin-bottom: 25px; }
+        .menu-title { font-size: 11px; color: #888; text-transform: uppercase; margin: 20px 0 8px; }
+        .menu-link { display: block; padding: 10px 12px; color: #ccc; text-decoration: none; border-radius: 6px; margin-bottom: 4px; }
+        .menu-link:hover { background: rgba(255,255,255,0.1); }
+        .menu-link.active { background: #2d5a44; color: white; }
+        .user-info { margin-top: auto; padding-top: 20px; border-top: 1px solid #333; }
+        .logout-btn { width: 100%; padding: 10px; background: #c0392b; color: white; border: none; border-radius: 6px; cursor: pointer; margin-top: 10px; }
+        .logout-btn:hover { background: #e74c3c; }
+        .main { flex: 1; margin-left: 240px; padding: 25px; }
+        .header { margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 24px; color: #333; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #1e3a2f; }
+        .stat-value.rojo { color: #e74c3c; }
+        .stat-label { color: #666; font-size: 13px; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { font-size: 11px; text-transform: uppercase; color: #888; }
+        .rojo { color: #e74c3c; font-weight: 600; }
+        .verde { color: #27ae60; font-weight: 600; }
+        .naranja { color: #f39c12; font-weight: 600; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+        .badge-red { background: #f8d7da; color: #721c24; }
+        .badge-yellow { background: #fff3cd; color: #856404; }
+        .badge-green { background: #d4edda; color: #155724; }
+        .filtros { display: flex; gap: 10px; margin-bottom: 15px; }
+        .filtro-btn { padding: 6px 12px; border: none; border-radius: 15px; background: #ddd; cursor: pointer; }
+        .filtro-btn.active { background: #1e3a2f; color: white; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } .stats { grid-template-columns: 1fr 1fr; } }
+    </style>
+    <link rel="stylesheet" href="css/nilar-theme.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo"><img src="assets/logo.jpeg" alt="Atelier NILAR — Moda y Estilo"></div>
+            <div class="menu-title">Principal</div>
+            <a href="dashboard.html" class="menu-link">📊 Dashboard</a>
+            <div class="menu-title">Gestión</div>
+            <a href="clientes.html" class="menu-link">👥 Clientes</a>
+            <a href="productos.html" class="menu-link">📦 Productos</a>
+            <a href="ventas.html" class="menu-link">💰 Ventas</a>
+            <a href="compras.html" class="menu-link">🛒 Compras</a>
+            <div class="menu-title">Operaciones</div>
+            <a href="inventario.html" class="menu-link active">📋 Inventario</a>
+            <a href="distribuciones.html" class="menu-link">🚚 Distribución</a>
+            <div class="menu-title">Sistema</div>
+            <a href="admin.html" class="menu-link">⚙️ Admin</a>
+            <div class="user-info">
+                <div id="userEmail" style="font-size:12px;color:#ccc;"></div>
+                <button class="logout-btn" onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+            </div>
+        </aside>
+        <main class="main">
+            <div class="header">
+                <h1 class="page-title">📋 Inventario</h1>
+            </div>
+            <div class="stats">
+                <div class="stat-card"><div class="stat-value" id="totalProd">0</div><div class="stat-label">Total Productos</div></div>
+                <div class="stat-card"><div class="stat-value" id="stockTotal">0</div><div class="stat-label">Stock Total</div></div>
+                <div class="stat-card"><div class="stat-value rojo" id="stockBajo">0</div><div class="stat-label">Stock Bajo (≤10)</div></div>
+                <div class="stat-card"><div class="stat-value rojo" id="sinStock">0</div><div class="stat-label">Sin Stock</div></div>
+            </div>
+            <div class="filtros">
+                <button class="filtro-btn active" onclick="filtrar('')">Todos</button>
+                <button class="filtro-btn" onclick="filtrar('bajo')">Bajo</button>
+                <button class="filtro-btn" onclick="filtrar('medio')">Medio</button>
+                <button class="filtro-btn" onclick="filtrar('alto')">Alto</button>
+                <button class="filtro-btn" onclick="filtrar('agotado')">Agotado</button>
+            </div>
+            <div class="card">
+                <div class="card-title">Control de Stock</div>
+                <table>
+                    <thead><tr><th>Producto</th><th>Categoría</th><th>P. Compra</th><th>P. Venta</th><th>Stock</th><th>Estado</th></tr></thead>
+                    <tbody id="tabla"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        import { firebaseConfig } from "./js/firebase-config.js";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        
+        let productos = [];
+        let filtro = '';
+        
+        // === CACHÉ RÁPIDO ===
+        const CACHE_KEY = 'nilar_cache_inventario';
+        
+        const loadCache = () => {
+            try {
+                const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
+                if (cached) {
+                    productos = cached.productos || [];
+                    document.getElementById('userEmail').textContent = cached.userEmail || '';
+                    renderizar();
+                }
+            } catch(e) {}
+        };
+        
+        const saveCache = () => {
+            try {
+                localStorage.setItem(CACHE_KEY, JSON.stringify({
+                    productos,
+                    userEmail: document.getElementById('userEmail').textContent
+                }));
+            } catch(e) {}
+        };
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) { window.location.href = 'index.html'; return; }
+            document.getElementById('userEmail').textContent = user.email;
+            
+            // CARGAR DESDE CACHÉ PRIMERO
+            loadCache();
+            
+            // LUEGO ACTUALIZAR EN BACKGROUND
+            await cargar(true);
+        });
+        
+        async function cargar(background = false) {
+            try {
+                const snap = await getDocs(collection(db, 'productos'));
+                productos = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => p.activo !== false);
+                saveCache();
+                renderizar();
+            } catch(e) {
+                if (!background) alert('Error: ' + e.message);
+            }
+        }
+        
+        function renderizar() {
+            const activos = productos.filter(p => p.activo !== false);
+            const sinStock = activos.filter(p => !p.stock || p.stock <= 0);
+            const stockBajo = activos.filter(p => p.stock > 0 && p.stock <= 10);
+            const stockTotal = activos.reduce((s, p) => s + (p.stock || 0), 0);
+            
+            document.getElementById('totalProd').textContent = activos.length;
+            document.getElementById('stockTotal').textContent = stockTotal;
+            document.getElementById('stockBajo').textContent = stockBajo.length;
+            document.getElementById('sinStock').textContent = sinStock.length;
+            
+            let filtered = activos;
+            if (filtro === 'agotado') filtered = sinStock;
+            else if (filtro === 'bajo') filtered = stockBajo;
+            else if (filtro === 'medio') filtered = activos.filter(p => p.stock > 10 && p.stock <= 50);
+            else if (filtro === 'alto') filtered = activos.filter(p => p.stock > 50);
+            
+            const tbody = document.getElementById('tabla');
+            if (!filtered.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;">Sin productos</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filtered.map(p => {
+                const stock = p.stock || 0;
+                const estado = stock === 0 ? 'Agotado' : stock <= 10 ? 'Bajo' : stock <= 50 ? 'Medio' : 'Alto';
+                const badge = stock === 0 ? 'badge-red' : stock <= 10 ? 'badge-yellow' : 'badge-green';
+                const color = stock === 0 ? 'rojo' : stock <= 10 ? 'naranja' : 'verde';
+                return `<tr>
+                    <td><strong>${p.nombre}</strong></td>
+                    <td>${p.categoria || 'General'}</td>
+                    <td>$${(p.precioCompra||0).toLocaleString()}</td>
+                    <td>$${(p.precioVenta||0).toLocaleString()}</td>
+                    <td class="${color}">${stock}</td>
+                    <td><span class="badge ${badge}">${estado}</span></td>
+                </tr>`;
+            }).join('');
+        }
+        
+        window.filtrar = (f) => {
+            filtro = f;
+            document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderizar();
+        };
+        
+        window.cerrarSesion = async () => {
+            if (confirm('¿Cerrar sesión?')) {
+                await signOut(auth);
+                window.location.href = 'index.html';
+            }
+        };
+    </script>
+</body>
+</html>

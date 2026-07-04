@@ -449,8 +449,13 @@ window.guardarVenta=async()=>{
             await batch.commit();
         }
         cerrarModalVenta();await cargar();alert('✅ Venta guardada');
-    }catch(e){alert('Error: '+e.message)}
-};
+    catch (e) {
+    console.error("ERROR COMPLETO:", e);
+    console.error("STACK:", e.stack);
+    console.error("clienteId:", clienteId);
+    console.error("items:", items);
+    alert("Error: " + e.message);
+}
 
 window.imprimirReporte=()=>{
     const win=window.open('','_blank');

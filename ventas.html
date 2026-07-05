@@ -433,23 +433,35 @@ window.guardarVenta=async()=>{
             // Devolver stock anterior
             (vOriginal.items||[]).forEach(i=>batch.update(doc(db,'productos',i.productoId),{stock:increment(i.cantidad)}));
             // Descontar cliente anterior
-            batch.update(doc(db,'clientes',vOriginal.clienteId,{totalComprado:increment((vOriginal.total||0)*-1),deudaTotal:increment(((vOriginal.total||0)-(vOriginal.pagado||0))*-1)}));
+            batch.update(doc(db,'clientes',vOriginal.clienteId),{
+                totalComprado:increment((vOriginal.total||0)*-1),
+                deudaTotal:increment(((vOriginal.total||0)-(vOriginal.pagado||0))*-1)
+            });
             // Actualizar venta
-            batch.update(doc(db,'ventas',ventaId,{clienteId,clienteNombre:cli.nombre,items,total,descuento,pagado,fecha:document.getElementById('fecha').value,fechaModificacion:new Date().toISOString()}));
+            batch.update(doc(db,'ventas',ventaId),{
+                clienteId,
+                clienteNombre:cli.nombre,
+                items,
+                total,
+                descuento,
+                pagado,
+                fecha:document.getElementById('fecha').value,
+                fechaModificacion:new Date().toISOString()
+            });
             // Descontar nuevo stock
             items.forEach(it=>batch.update(doc(db,'productos',it.productoId),{stock:increment(it.cantidad*-1)}));
             // Sumar cliente nuevo
-            batch.update(doc(db,'clientes',clienteId,{totalComprado:increment(total),deudaTotal:increment(Math.max(total-pagado,0))}));
+            batch.update(doc(db,'clientes',clienteId),{totalComprado:increment(total),deudaTotal:increment(Math.max(total-pagado,0))});
             await batch.commit();
         }else{
             await addDoc(collection(db,'ventas'),{clienteId,clienteNombre:cli.nombre,items,total,descuento,pagado,fecha:document.getElementById('fecha').value,activo:true,fechaCreacion:new Date().toISOString()});
             const batch=writeBatch(db);
             items.forEach(it=>batch.update(doc(db,'productos',it.productoId),{stock:increment(it.cantidad*-1)}));
-            batch.update(doc(db,'clientes',clienteId,{totalComprado:increment(total),deudaTotal:increment(Math.max(total-pagado,0))}));
+                batch.update(doc(db,'clientes',clienteId),{totalComprado:increment(total),deudaTotal:increment(Math.max(total-pagado,0))});
             await batch.commit();
         }
         cerrarModalVenta();await cargar();alert('✅ Venta guardada');
-   }catch(e){alert('Error: '+e.message)}
+    }catch(e){alert('Error: '+e.message)}
 };
 
 window.imprimirReporte=()=>{
